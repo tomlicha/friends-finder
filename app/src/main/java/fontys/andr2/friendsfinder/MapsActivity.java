@@ -1,7 +1,11 @@
 package fontys.andr2.friendsfinder;
 
-import android.support.v4.app.FragmentActivity;
+import android.Manifest;
+import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,8 +14,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import java.util.List;
 
+import pub.devrel.easypermissions.EasyPermissions;
+import pub.devrel.easypermissions.PermissionRequest;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
+
+    private final static int LOCATION_REQUEST_ID = 0100;
     private GoogleMap mMap;
 
     @Override
@@ -22,6 +32,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        checkEasyPermission();
+    }
+
+    private void checkEasyPermission() {
+        if(!EasyPermissions.hasPermissions(this,Manifest.permission.ACCESS_FINE_LOCATION)){
+            EasyPermissions.requestPermissions(
+                    new PermissionRequest.Builder(this, LOCATION_REQUEST_ID, Manifest.permission.ACCESS_FINE_LOCATION)
+                            .setRationale("The application need Location permission to work properly")
+                            .setPositiveButtonText("I understand")
+                            .setNegativeButtonText("I refuse")
+                            .build());
+        }
     }
 
 
@@ -42,5 +64,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        Toast.makeText(this,
+                "The application need location permission to work properly",
+                Toast.LENGTH_LONG)
+                .show();
+        finish();
     }
 }
