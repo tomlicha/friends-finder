@@ -106,11 +106,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onStart() {
         super.onStart();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-
         updateUI(account);
     }
-
-
 
     /*
     @Override
@@ -167,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             handleSignInResult(task);
             // [END get_id_token]
         }
+        onStart();
     }
 
     private void handleSignInResult(@NonNull Task<GoogleSignInAccount> completedTask) {
