@@ -15,26 +15,32 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallbacks;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.InputStream;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     //Used for OAuth - Start
     private static final String TAG = "IdTokenActivity";
     private static final int RC_GET_TOKEN = 9002;
     private static final int RC_SIGN_IN = 9001;
 
-    private GoogleSignInClient mGoogleSignInClient;
+    private GoogleApiClient googleApiClient;
 
     private ImageView profilePic;
     private TextView fullnameTextView;
@@ -58,12 +64,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
 
-        /*
-        //Sign-in
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        */
 
         //Sign-In-token
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -71,7 +71,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .requestEmail()
                 .build();
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this,this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API,gso)
+                .build();
 
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
@@ -91,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 launchMapActivity();
                 break;
             case R.id.sign_in_button:
-                getIdToken();
+                signIn();
                 break;
             case R.id.sign_out_button:
                 signOut();
@@ -105,119 +110,66 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //OnStart
     public void onStart() {
         super.onStart();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        updateUI(account);
+
     }
 
-    /*
+
+    private void signIn(){
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+        startActivity(signInIntent);
+
+    }
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d("result code ",Integer.toString(resultCode));
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
-    }
-    */
-
-    /*
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-
-            // Signed in successfully, show authenticated UI.
-            updateUI(account);
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            updateUI(null);
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Log.d("call function handlesigninresult","");
+            handleSignInResult(result);
         }
     }
 
-    private void signIn() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-    */
-
-    //Get Token ID
-    private void getIdToken() {
-        //For GoogleSignInOption, show several email address.
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_GET_TOKEN);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_GET_TOKEN) {
-            // [START get_id_token]
-            // This task is always completed immediately, there is no need to attach an
-            // asynchronous listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-            // [END get_id_token]
+    private void handleSignInResult(GoogleSignInResult result) {
+        Log.d("result received :"," "+result.isSuccess());
+        if(result.isSuccess()){
+            GoogleSignInAccount account = result.getSignInAccount();
+            Log.d("result received :"," "+account.getDisplayName()+account.getEmail()+account.getFamilyName()+account.getGivenName());
+            emailTextView.setText("Hello, "+account.getEmail());
         }
-        onStart();
-    }
-
-    private void handleSignInResult(@NonNull Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            String idToken = account.getIdToken();
-
-            // TODO(developer): send ID Token to server and validate
-
-            //updateUI(account);
-        } catch (ApiException e) {
-            Log.w(TAG, "handleSignInResult:error", e);
-            //updateUI(null);
+        else {
+            Log.d("login failed :"," "+result.isSuccess());
         }
     }
 
     private void signOut() {
-        mGoogleSignInClient.signOut()
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        updateUI(null);
-                    }
-                });
+
+        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
+            @Override
+            public void onSuccess(@NonNull Status status) {
+                emailTextView.setText("Signed out");
+            }
+
+            @Override
+            public void onFailure(@NonNull Status status) {
+
+            }
+        });
     }
 
-    private void updateUI(@Nullable GoogleSignInAccount account) {
-        if (account != null) {
-            Uri url = account.getPhotoUrl();
-            String imgUrl;
-            if (url != null){
-                imgUrl= url.toString();
-            }
-            else{
-                imgUrl= "null";
-            }
-            //new DownloadImageTask(profilePic).execute(imgUrl);
-            fullnameTextView.setText("Name: " + account.getDisplayName());
-            emailTextView.setText("Email: " + account.getEmail());
 
-            String idToken = account.getIdToken();
-            mIdTokenTextView.setText("Photo URL:" + imgUrl);
 
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
-        }
-        else {
-            fullnameTextView.setText("Name: None");
-            emailTextView.setText("Email: None");
-            mIdTokenTextView.setText("Token: Null");
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_button).setVisibility(View.GONE);
-        }
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 
     private class DownloadImageTask extends AsyncTask<String,Void,Bitmap> {
