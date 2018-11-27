@@ -4,4 +4,7 @@
     <string name="start_map">Start Map</string>
 
     <string name="server_client_id">747311174522-b3bfa347e4cbda20bbbi2bpocaro6gal.apps.googleusercontent.com</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
