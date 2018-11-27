@@ -72,10 +72,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .build();
 
 
-
         googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this,this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API,gso)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
         SignInButton signInButton = findViewById(R.id.sign_in_button);
@@ -85,13 +84,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         //Used for OAuth - End
     }
 
-    void launchMapActivity(){
+    void launchMapActivity() {
         startActivity(new Intent(this, MapsActivity.class));
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_start_map:
                 launchMapActivity();
                 break;
@@ -110,13 +109,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     //OnStart
     public void onStart() {
         super.onStart();
-
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        //updateUI(account);
     }
 
 
-    private void signIn(){
+    private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-        startActivity(signInIntent);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
 
@@ -124,88 +124,91 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d("result code ",Integer.toString(resultCode));
+        Log.d("result code ", Integer.toString(resultCode));
 
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            Log.d("call function handlesigninresult","");
+            Log.d("call function handlesigninresult", "");
             handleSignInResult(result);
         }
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        Log.d("result received :"," "+result.isSuccess());
-        if(result.isSuccess()){
+        Log.d("result received :", " " + result.isSuccess());
+        if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            Log.d("result received :"," "+account.getDisplayName()+account.getEmail()+account.getFamilyName()+account.getGivenName());
-            emailTextView.setText("Hello, "+account.getEmail());
-        }
-        else {
-            Log.d("login failed :"," "+result.isSuccess());
+            Log.d("result received :", " " + account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName());
+            emailTextView.setText("Hello, " + account.getEmail());
+        } else {
+            Log.d("login failed :", " " + result.isSuccess());
         }
     }
 
-    private void signOut() {
 
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
+            private void signOut () {
+
+                Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
+                    @Override
+                    public void onSuccess(@NonNull Status status) {
+                        emailTextView.setText("Signed out");
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Status status) {
+
+                    }
+                });
+            }
+
+
             @Override
-            public void onSuccess(@NonNull Status status) {
-                emailTextView.setText("Signed out");
+            public void onConnectionFailed (@NonNull ConnectionResult connectionResult){
+
             }
 
             @Override
-            public void onFailure(@NonNull Status status) {
+            public void onPointerCaptureChanged ( boolean hasCapture){
 
             }
-        });
-    }
 
+            private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+                ImageView imageView;
 
+                public DownloadImageTask(ImageView imageView) {
+                    this.imageView = imageView;
+                }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
-
-    private class DownloadImageTask extends AsyncTask<String,Void,Bitmap> {
-        ImageView imageView;
-
-        public DownloadImageTask(ImageView imageView){
-            this.imageView = imageView;
-        }
-
-        /*
-            doInBackground(Params... params)
-                Override this method to perform a computation on a background thread.
-         */
-        protected Bitmap doInBackground(String...urls){
-            String urlOfImage = urls[0];
-            Bitmap logo = null;
-            try{
-                InputStream is = new URL(urlOfImage).openStream();
+                /*
+                    doInBackground(Params... params)
+                        Override this method to perform a computation on a background thread.
+                 */
+                protected Bitmap doInBackground(String... urls) {
+                    String urlOfImage = urls[0];
+                    Bitmap logo = null;
+                    try {
+                        InputStream is = new URL(urlOfImage).openStream();
                 /*
                     decodeStream(InputStream is)
                         Decode an input stream into a bitmap.
                  */
-                logo = BitmapFactory.decodeStream(is);
-            }catch(Exception e){ // Catch the download exception
-                e.printStackTrace();
+                        logo = BitmapFactory.decodeStream(is);
+                    } catch (Exception e) { // Catch the download exception
+                        e.printStackTrace();
+                    }
+                    return logo;
+                }
+
+                /*
+                    onPostExecute(Result result)
+                        Runs on the UI thread after doInBackground(Params...).
+                 */
+                protected void onPostExecute(Bitmap result) {
+                    imageView.setImageBitmap(result);
+                }
             }
-            return logo;
+            //Used for OAuth - End
         }
 
-        /*
-            onPostExecute(Result result)
-                Runs on the UI thread after doInBackground(Params...).
-         */
-        protected void onPostExecute(Bitmap result){
-            imageView.setImageBitmap(result);
-        }
-    }
-    //Used for OAuth - End
-}
+
+
+
