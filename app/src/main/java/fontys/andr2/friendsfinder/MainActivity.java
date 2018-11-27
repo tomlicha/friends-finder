@@ -131,26 +131,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             emailTextView.setVisibility(View.VISIBLE);
             fullnameTextView.setVisibility(View.VISIBLE);
             Uri personPhoto = account.getPhotoUrl();
-
-
+            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+            findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
             if (personPhoto != null) {
                 ImageView imgView = profilePic;
                 // Download photo and set to image
                 Context context = imgView.getContext();
 
-
                 Picasso.with(context).load(personPhoto).into(imgView);
-                findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-                findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
-
-
-
             }
 
 
         } else {
-            Log.d("login failed :", " " + result.isSuccess());
+            Log.d("login failed :", " " + result.getStatus());
         }
+
     }
 
 
@@ -170,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             @Override
             public void onFailure(@NonNull Status status) {
-
+                Log.e("statut : ",status.toString());
             }
         });
     }
