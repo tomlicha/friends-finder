@@ -1,43 +1,31 @@
 package fontys.andr2.friendsfinder;
 
-import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
-import java.io.InputStream;
-import java.net.URL;
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
-    //Used for OAuth - Start
-    private static final String TAG = "IdTokenActivity";
-    private static final int RC_GET_TOKEN = 9002;
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient googleApiClient;
@@ -45,7 +33,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private ImageView profilePic;
     private TextView fullnameTextView;
     private TextView emailTextView;
-    private TextView mIdTokenTextView;
+
+
     //Used for OAuth - End
 
     @Override
@@ -58,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         profilePic = findViewById(R.id.profile_image);
         fullnameTextView = findViewById(R.id.name_view);
         emailTextView = findViewById(R.id.email_view);
-        mIdTokenTextView = findViewById(R.id.token_detail);
+
 
         //OnClickListener
         findViewById(R.id.sign_in_button).setOnClickListener(this);
@@ -67,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         //Sign-In-token
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                //.requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
 
@@ -138,27 +126,54 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
             Log.d("result received :", " " + account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName());
-            emailTextView.setText("Hello, " + account.getEmail());
+            emailTextView.setText("email : " + account.getEmail());
+            fullnameTextView.setText("Hello "+account.getDisplayName());
+            emailTextView.setVisibility(View.VISIBLE);
+            fullnameTextView.setVisibility(View.VISIBLE);
+            Uri personPhoto = account.getPhotoUrl();
+
+
+            if (personPhoto != null) {
+                ImageView imgView = profilePic;
+                // Download photo and set to image
+                Context context = imgView.getContext();
+
+
+                Picasso.with(context).load(personPhoto).into(imgView);
+                findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+                findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+
+
+
+            }
+
+
         } else {
             Log.d("login failed :", " " + result.isSuccess());
         }
     }
 
 
-            private void signOut () {
+    private void signOut () {
 
-                Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
-                    @Override
-                    public void onSuccess(@NonNull Status status) {
-                        emailTextView.setText("Signed out");
-                    }
+        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
+            @Override
+            public void onSuccess(@NonNull Status status) {
+               Toast.makeText(getApplication(),"Successfuly signed out",Toast.LENGTH_SHORT).show();
+                emailTextView.setVisibility(View.GONE);
+                fullnameTextView.setVisibility(View.GONE);
+                findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+                findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+                profilePic.setImageResource(0);
 
-                    @Override
-                    public void onFailure(@NonNull Status status) {
-
-                    }
-                });
             }
+
+            @Override
+            public void onFailure(@NonNull Status status) {
+
+            }
+        });
+    }
 
 
             @Override
@@ -171,44 +186,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             }
 
-            private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-                ImageView imageView;
 
-                public DownloadImageTask(ImageView imageView) {
-                    this.imageView = imageView;
-                }
-
-                /*
-                    doInBackground(Params... params)
-                        Override this method to perform a computation on a background thread.
-                 */
-                protected Bitmap doInBackground(String... urls) {
-                    String urlOfImage = urls[0];
-                    Bitmap logo = null;
-                    try {
-                        InputStream is = new URL(urlOfImage).openStream();
-                /*
-                    decodeStream(InputStream is)
-                        Decode an input stream into a bitmap.
-                 */
-                        logo = BitmapFactory.decodeStream(is);
-                    } catch (Exception e) { // Catch the download exception
-                        e.printStackTrace();
-                    }
-                    return logo;
-                }
-
-                /*
-                    onPostExecute(Result result)
-                        Runs on the UI thread after doInBackground(Params...).
-                 */
-                protected void onPostExecute(Bitmap result) {
-                    imageView.setImageBitmap(result);
-                }
-            }
-            //Used for OAuth - End
         }
-
-
-
 
