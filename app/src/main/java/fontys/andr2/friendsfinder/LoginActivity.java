@@ -80,7 +80,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     void launchMapActivity() {
 
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-        profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+        if (profilePicture!=null) profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
         byte[] byteArray = bStream.toByteArray();
 
         Intent intent = new Intent(this, MainActivity.class);
