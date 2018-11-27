@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "728050478392",
+    "firebase_url": "https://wherearemyfriends-8c571.firebaseio.com",
+    "project_id": "wherearemyfriends-8c571",
+    "storage_bucket": "wherearemyfriends-8c571.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728050478392:android:e4f0eaa73f863a11",
+        "android_client_info": {
+          "package_name": "fontys.andr2.friendsfinder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "728050478392-q0nankijhnkfr3ell5oq32t4v4j86jj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fontys.andr2.friendsfinder",
+            "certificate_hash": "20a8a4ed2be04bf5dc77d58d1ba9d39638de33cc"
+          }
+        },
+        {
+          "client_id": "728050478392-pr86e5kb0pon52314qk1q4qa990t1pje.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCakOwbDMdq8avkvmW1f7H49pEr68dseCY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "728050478392-pr86e5kb0pon52314qk1q4qa990t1pje.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
