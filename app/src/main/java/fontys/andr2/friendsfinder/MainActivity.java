@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onStart() {
         super.onStart();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        updateUI(account);
+        //updateUI(account);
     }
 
     /*
@@ -174,10 +174,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             // TODO(developer): send ID Token to server and validate
 
-            //updateUI(account);
+            updateUI(account);
         } catch (ApiException e) {
             Log.w(TAG, "handleSignInResult:error", e);
-            //updateUI(null);
+            updateUI(null);
         }
     }
 
