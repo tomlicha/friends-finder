@@ -2,6 +2,8 @@ package fontys.andr2.friendsfinder;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +26,8 @@ import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     private static final int RC_SIGN_IN = 9001;
@@ -34,7 +38,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private TextView fullnameTextView;
     private TextView emailTextView;
 
-
+    private String email,fullname;
+    private Bitmap profilePicture;
     //Used for OAuth - End
 
     @Override
@@ -73,7 +78,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     void launchMapActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+        byte[] byteArray = bStream.toByteArray();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        Log.d("\nintent extras : ",email + fullname);
+        intent.putExtra("email",email);
+        intent.putExtra("name",fullname);
+        intent.putExtra("profilePicture",byteArray);
+        startActivity(intent);
     }
 
     @Override
@@ -126,6 +141,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
             Log.d("result received :", " " + account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName());
+            email =account.getEmail();
+
+            fullname = account.getDisplayName();
             emailTextView.setText("email : " + account.getEmail());
             fullnameTextView.setText("Hello "+account.getDisplayName());
             emailTextView.setVisibility(View.VISIBLE);
@@ -134,11 +152,26 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
             if (personPhoto != null) {
-                ImageView imgView = profilePic;
+                final ImageView imgView = profilePic;
                 // Download photo and set to image
                 Context context = imgView.getContext();
-
                 Picasso.with(context).load(personPhoto).into(imgView);
+                Picasso.with(this)
+                        .load(personPhoto)
+                        .into(imgView, new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                profilePicture = ((BitmapDrawable)imgView.getDrawable()).getBitmap();
+
+                            }
+
+                            @Override
+                            public void onError() {
+
+                            }
+
+
+                        });
             }
 
 

@@ -1,26 +1,36 @@
 package fontys.andr2.friendsfinder;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import fontys.andr2.friendsfinder.Fragments.FriendsFragment;
 import fontys.andr2.friendsfinder.Fragments.MapFragment;
 import fontys.andr2.friendsfinder.Fragments.ProfileFragment;
-import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends FragmentActivity {
-
+    public static String email;
+    public static String name;
+    public static Bitmap profilePicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        email = intent.getStringExtra("email");
+        name = intent.getStringExtra("name");
+        byte[] byteArray = getIntent().getByteArrayExtra("profilePicture");
+        profilePicture = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+
+       // profilepicture = (Bitmap) intent.getParcelableExtra("profilePicture");
+
         setContentView(R.layout.activity_main);
 
         final ProfileFragment profileFragment = new ProfileFragment();
