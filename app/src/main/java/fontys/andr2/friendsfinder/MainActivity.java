@@ -13,6 +13,7 @@ import android.widget.TextView;
 import fontys.andr2.friendsfinder.Fragments.FriendsFragment;
 import fontys.andr2.friendsfinder.Fragments.MapFragment;
 import fontys.andr2.friendsfinder.Fragments.ProfileFragment;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends FragmentActivity {
 
@@ -24,6 +25,7 @@ public class MainActivity extends FragmentActivity {
 
         final ProfileFragment profileFragment = new ProfileFragment();
         final MapFragment mapFragment = new MapFragment();
+        mapFragment.setActivity(this);
         final FriendsFragment friendsFragment = new FriendsFragment();
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
