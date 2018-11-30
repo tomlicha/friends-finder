@@ -16,10 +16,7 @@ import fontys.andr2.friendsfinder.Fragments.MapFragment;
 import fontys.andr2.friendsfinder.Fragments.ProfileFragment;
 
 public class MainActivity extends FragmentActivity {
-    public static String email;
-    public static String name;
-    public static Bitmap profilePicture;
-    private User user;
+
 
 
     @Override
@@ -27,10 +24,6 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        email = intent.getStringExtra("email");
-        name = intent.getStringExtra("name");
-        byte[] byteArray = getIntent().getByteArrayExtra("profilePicture");
-        profilePicture = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
        // profilepicture = (Bitmap) intent.getParcelableExtra("profilePicture");
 
