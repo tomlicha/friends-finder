@@ -14,4 +14,6 @@
     <string name="title_profile">Profile</string>
     <string name="title_map">Map</string>
     <string name="title_friends">Friends</string>
+    <string name="userData">null</string>
+
 </resources>

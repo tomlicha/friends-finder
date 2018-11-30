@@ -19,10 +19,13 @@ public class MainActivity extends FragmentActivity {
     public static String email;
     public static String name;
     public static Bitmap profilePicture;
+    private User user;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Intent intent = getIntent();
         email = intent.getStringExtra("email");
         name = intent.getStringExtra("name");

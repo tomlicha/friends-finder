@@ -2,6 +2,7 @@ package fontys.andr2.friendsfinder;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -24,6 +25,7 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
+import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
@@ -33,13 +35,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient googleApiClient;
+    public static final String MyPREFERENCES = "MyPrefs" ;
 
     private ImageView profilePic;
     private TextView fullnameTextView;
     private TextView emailTextView;
-
+    private Genson genson= new Genson();
+    private String Userdata;
     private String email,fullname;
     private Bitmap profilePicture;
+    private User user;
+    byte[] byteArray;
     //Used for OAuth - End
 
     @Override
@@ -79,12 +85,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     void launchMapActivity() {
 
-        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-        profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
-        byte[] byteArray = bStream.toByteArray();
 
         Intent intent = new Intent(this, MainActivity.class);
-        Log.d("\nintent extras : ",email + fullname);
+
         intent.putExtra("email",email);
         intent.putExtra("name",fullname);
         intent.putExtra("profilePicture",byteArray);
@@ -142,7 +145,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             GoogleSignInAccount account = result.getSignInAccount();
             Log.d("result received :", " " + account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName());
             email =account.getEmail();
-
             fullname = account.getDisplayName();
             emailTextView.setText("email : " + account.getEmail());
             fullnameTextView.setText("Hello "+account.getDisplayName());
@@ -162,6 +164,28 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             @Override
                             public void onSuccess() {
                                 profilePicture = ((BitmapDrawable)imgView.getDrawable()).getBitmap();
+                                ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                                profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                                byteArray = bStream.toByteArray();
+
+                                Log.e("\nintent extras : ",email + fullname);
+                                new Thread(new Runnable() {
+                                    public void run() {
+                                        user = new User(byteArray,fullname,email);
+                                        Log.e("user created : \n",user.getEmail()+user.getName());
+                                        if (user!=null) {
+                                            Userdata = genson.serialize(user);
+                                            SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
+                                            SharedPreferences.Editor editor = sharedPref.edit();
+                                            editor.putString("userData", Userdata);
+                                            editor.apply();
+
+
+                                        }
+
+                                    }
+                                }).start();
+
 
                             }
 
