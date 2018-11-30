@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "728050478392-kqsd7ksffv1niqslqscp2o9h1ju0nt3k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fontys.andr2.friendsfinder",
+            "certificate_hash": "ae67af58bd95e468ca4dce2de32e0d5888802bd9"
+          }
+        },
+        {
           "client_id": "728050478392-pr86e5kb0pon52314qk1q4qa990t1pje.apps.googleusercontent.com",
           "client_type": 3
         }
