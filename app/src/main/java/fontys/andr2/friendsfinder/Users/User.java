@@ -3,15 +3,15 @@ package fontys.andr2.friendsfinder.Users;
 import android.graphics.Bitmap;
 
 public class User{
-    private byte[] profilePicture;
+    private String profilePicture;
     private String name;
     private String email;
 
-    public byte[] getProfilePicture() {
+    public String getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(byte[] profilePicture) {
+    public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 
@@ -31,7 +31,7 @@ public class User{
         this.email = email;
     }
 
-    public User(byte[] profilePicture, String name, String email) {
+    public User(String profilePicture, String name, String email) {
 
         this.profilePicture = profilePicture;
         this.name = name;
@@ -39,5 +39,12 @@ public class User{
     }
 
     public User() {
+    }
+
+    /**
+     * Send to firebase the update of latitude and longitude
+     */
+    public void updateMyPosition() {
+
     }
 }

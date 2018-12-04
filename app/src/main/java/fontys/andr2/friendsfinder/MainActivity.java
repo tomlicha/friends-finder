@@ -4,20 +4,25 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.MenuItem;
 
 import fontys.andr2.friendsfinder.Fragments.FriendsFragment;
 import fontys.andr2.friendsfinder.Fragments.MapFragment;
 import fontys.andr2.friendsfinder.Fragments.ProfileFragment;
+import fontys.andr2.friendsfinder.Users.User;
+import fontys.andr2.friendsfinder.Users.UsersAvailable;
 
 public class MainActivity extends FragmentActivity {
 
-
+    UsersAvailable usersAvailable;
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,26 @@ public class MainActivity extends FragmentActivity {
             }
         });
         navigation.setSelectedItemId(R.id.navigation_map);
+        usersAvailable = new UsersAvailable();
+        usersAvailable.setRefreshListener(new UsersAvailable.RefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.i("MainActivity", usersAvailable.getAvailables().toString());
+            }
+        });
+        startRefreshThread();
+    }
+
+    private void startRefreshThread() {
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                usersAvailable.refreshAvailable();
+                Log.i("MainActivity", "Refreshed");
+                handler.postDelayed(this, 1000);
+            }
+        }).start();
     }
 
     private void setFragment(Fragment fragment) {
