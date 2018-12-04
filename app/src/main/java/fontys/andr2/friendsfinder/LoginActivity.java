@@ -30,6 +30,8 @@ import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 
+import fontys.andr2.friendsfinder.Users.User;
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     private static final int RC_SIGN_IN = 9001;
