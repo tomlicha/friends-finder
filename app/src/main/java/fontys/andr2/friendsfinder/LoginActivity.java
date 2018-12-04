@@ -25,6 +25,8 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
 
@@ -45,8 +47,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private String email,fullname;
     private Bitmap profilePicture;
     private User user;
+    private DatabaseReference mDatabase;
+// ...
     byte[] byteArray;
     //Used for OAuth - End
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         setContentView(R.layout.activity_login);
 
         //Used for OAuth - Start
+        mDatabase = FirebaseDatabase.getInstance().getReference("user");
+
         //Show Token
         profilePic = findViewById(R.id.profile_image);
         fullnameTextView = findViewById(R.id.name_view);
@@ -138,14 +145,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d("result received :", " " + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            Log.d("result received :", " " + account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName());
+            Log.d("user received :",  account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName() + "url picture :"+account.getPhotoUrl());
             email =account.getEmail();
             fullname = account.getDisplayName();
             emailTextView.setText("email : " + account.getEmail());
             fullnameTextView.setText("Hello "+account.getDisplayName());
             emailTextView.setVisibility(View.VISIBLE);
             fullnameTextView.setVisibility(View.VISIBLE);
-            Uri personPhoto = account.getPhotoUrl();
+            final Uri personPhoto = account.getPhotoUrl();
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
             if (personPhoto != null) {
@@ -166,11 +173,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 Log.e("\nintent extras : ",email + fullname);
                                 new Thread(new Runnable() {
                                     public void run() {
-                                        user = new User(byteArray,fullname,email);
+                                        user = new User(personPhoto.toString(),fullname,email);
                                         Log.e("user created : \n",user.getEmail()+user.getName());
                                         if (user!=null) {
                                             Userdata = genson.serialize(user);
-                                            SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
+                                            String userId = mDatabase.push().getKey();
+                                            mDatabase.child(userId).setValue(Userdata);                                            SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
                                             SharedPreferences.Editor editor = sharedPref.edit();
                                             editor.putString("userData", Userdata);
                                             editor.apply();
