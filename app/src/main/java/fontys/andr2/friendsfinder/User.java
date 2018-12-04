@@ -8,6 +8,25 @@ public class User{
     private String profilePictureUri;
     private String name;
     private String email;
+    private double latitude;
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    private double longitude;
 
     public String getProfilePicture() {
         return profilePictureUri;
@@ -38,6 +57,8 @@ public class User{
         this.profilePictureUri = profilePictureUri;
         this.name = name;
         this.email = email;
+        this.latitude=0.0;
+        this.longitude=0.0;
     }
 
     public User() {
