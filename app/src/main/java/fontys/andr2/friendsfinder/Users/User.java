@@ -10,7 +10,13 @@ public class User{
     private double latitude;
     private double longitude;
 
-
+    public User(String profilePictureUri, String name, String email, double latitude, double longitude) {
+        this.profilePictureUri = profilePictureUri;
+        this.name = name;
+        this.email = email;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     public String getProfilePicture() {
         return profilePictureUri;

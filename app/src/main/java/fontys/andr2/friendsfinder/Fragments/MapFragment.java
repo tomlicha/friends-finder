@@ -228,14 +228,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     }
 
     private void addUserOnMap(Activity activity, final User user) {
-        final LatLng latLng = new LatLng(user.getLongitude(), user.getLatitude());
-        final MarkerOptions options = new MarkerOptions().position(latLng);
-        final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
-        options.title("Ketan Ramani");
-        options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
-        mMap.addMarker(options);
-
-        options.anchor(0.5f, 0.907f);
+//        final LatLng latLng = new LatLng(user.getLongitude(), user.getLatitude());
+//        final MarkerOptions options = new MarkerOptions().position(latLng);
+//        final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
+//        options.title("Ketan Ramani");
+//        options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+//        mMap.addMarker(options);
+//
+//        options.anchor(0.5f, 0.907f);
 //        activity.runOnUiThread(new Runnable() {
 //            @Override
 //            public void run() {
