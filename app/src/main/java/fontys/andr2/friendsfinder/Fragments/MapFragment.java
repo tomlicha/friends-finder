@@ -16,6 +16,8 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -58,11 +60,12 @@ import pub.devrel.easypermissions.PermissionRequest;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
     FragmentActivity activity;
-
+    LocationManager locationManager;
     private final static int LOCATION_REQUEST_ID = 0100;
     private GoogleMap mMap;
     private MyLocation myLocation;
     private Genson genson = new Genson();
+    LocationListener locationListenerGPS;
 
     private User user;
 
@@ -81,6 +84,52 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert mMapFragment != null;
+        locationListenerGPS=new LocationListener() {
+            @Override
+            public void onLocationChanged(android.location.Location location) {
+                final double latitude=location.getLatitude();
+                final double longitude=location.getLongitude();
+                String msg="New Latitude: "+latitude + "New Longitude: "+longitude;
+                Toast.makeText(getContext(),msg,Toast.LENGTH_LONG).show();
+                DatabaseReference objRef = FirebaseDatabase.getInstance().getReference("Users");
+                Query pendingTasks = objRef.orderByChild("name").equalTo(user.getName());
+                pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot tasksSnapshot) {
+                        for (DataSnapshot snapshot : tasksSnapshot.getChildren()) {
+                            snapshot.getRef().child("latitude").setValue(latitude);
+                            snapshot.getRef().child("longitude").setValue(longitude);
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        System.out.println("The read failed: " + databaseError.getMessage());
+
+                    }
+
+
+                });
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+
         mMapFragment.getMapAsync(this);
         return v;
     }
@@ -102,7 +151,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                         .show();
                 return;
             }
-            mMap.setMyLocationEnabled(true);
+            locationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER,
+                    2000,
+                    10, locationListenerGPS);
 
         }
     }
@@ -153,6 +205,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
 
         });
+
+
         // Add a marker in Sydney and move the camera
 
     }
@@ -176,7 +230,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                     .show();
             return;
         }
-        mMap.setMyLocationEnabled(true);
 
     }
 
