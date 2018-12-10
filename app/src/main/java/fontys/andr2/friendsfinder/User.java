@@ -9,6 +9,8 @@ public class User{
     private String name;
     private String email;
     private double latitude;
+    private double longitude;
+
 
     public double getLatitude() {
         return latitude;
@@ -25,8 +27,6 @@ public class User{
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
-
-    private double longitude;
 
     public String getProfilePicture() {
         return profilePictureUri;
