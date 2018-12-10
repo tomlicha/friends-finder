@@ -2,11 +2,8 @@ package fontys.andr2.friendsfinder.Fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -18,7 +15,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,15 +24,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import fontys.andr2.friendsfinder.MainActivity;
 import fontys.andr2.friendsfinder.R;
-import fontys.andr2.friendsfinder.User;
+import fontys.andr2.friendsfinder.Users.User;
 
 
 public class FriendsFragment extends Fragment {
