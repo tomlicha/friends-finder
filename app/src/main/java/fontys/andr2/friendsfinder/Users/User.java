@@ -58,7 +58,8 @@ public class User{
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(Double longitude) {
+        if (longitude==null) longitude = 0.0;
         this.longitude = longitude;
     }
 
@@ -66,7 +67,8 @@ public class User{
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(Double latitude) {
+        if (latitude==null) latitude = 0.0;
         this.latitude = latitude;
     }
 

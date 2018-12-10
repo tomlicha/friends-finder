@@ -1,11 +1,22 @@
 package fontys.andr2.friendsfinder.Users;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.HashMap;
+
+import fontys.andr2.friendsfinder.Fragments.FriendsFragment;
 
 public class UsersAvailable {
 
     private HashMap<String,User> usersAvailable;
     private RefreshListener refreshListener;
+
 
     public UsersAvailable() {
         this.usersAvailable = new HashMap<>();
@@ -15,19 +26,35 @@ public class UsersAvailable {
         return usersAvailable.get(email);
     }
 
-    public HashMap<String, User> getAvailables(){
+    public HashMap<String, User> getAvailable(){
         return usersAvailable ;
     }
 
-    public void refreshAvailable (){
-        usersAvailable.clear();
-        usersAvailable.put("b4mamanch@enib.fr",
-                new User("http://ibb.co/K9Df28L", "Baptiste", "b4mamanch@enib.fr", 48,2));
-        usersAvailable.put("t4licha@enib.fr",
-                new User("http://ibb.co/RTgwp8t", "Tom", "t4licha@enib.fr", 48,4));
-        usersAvailable.put("g4gary@enib.fr",
-                new User("http://ibb.co/r5Ymq3p", "Gary", "g4gary@enib.fr", 48,3));
-        if(refreshListener!=null) refreshListener.onRefresh();
+    public void setRefresh(DatabaseReference mDatabase){
+        mDatabase.addValueEventListener
+                (new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                            String name = ds.child("name").getValue(String.class);
+                            String email = ds.child("email").getValue(String.class);
+                            Double latitude = ds.child("latitude").getValue(Double.class);
+                            Double longitude = ds.child("longitude").getValue(Double.class);
+                            String profilePicture = ds.child("profilePicture").getValue(String.class);
+                            Log.d("TAG", name + " / " + email + " / " + profilePicture);
+                            User user = new User (profilePicture,name,email);
+                            user.setLongitude(longitude);
+                            user.setLatitude(latitude);
+                            usersAvailable.put(email, user);
+                        }
+                        if(refreshListener!=null) refreshListener.onRefresh();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
 
     }
 

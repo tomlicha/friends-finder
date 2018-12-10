@@ -12,11 +12,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,23 +26,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.owlike.genson.Genson;
-
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -52,11 +44,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import fontys.andr2.friendsfinder.MyLocation;
 import fontys.andr2.friendsfinder.R;
 import fontys.andr2.friendsfinder.Users.User;
-
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.PermissionRequest;
 
@@ -80,11 +72,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        assert mMapFragment != null;
         mMapFragment.getMapAsync(this);
         return v;
     }
@@ -128,7 +121,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         mMap.setOnMyLocationClickListener(onMyLocationClickListener);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         checkEasyPermission();
-        SharedPreferences sharedPref = getActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = Objects.requireNonNull(getActivity()).getSharedPreferences("pref", Context.MODE_PRIVATE);
         String teste = sharedPref.getString("userData", "null");
         Log.d("user created:", teste);
 
@@ -141,7 +134,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         Query pendingTasks = objRef.orderByChild("name").equalTo(user.getName());
         pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot tasksSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot tasksSnapshot) {
                 for (DataSnapshot snapshot: tasksSnapshot.getChildren()) {
                     snapshot.getRef().child("latitude").setValue(user.getLatitude());
                     snapshot.getRef().child("longitude").setValue(user.getLongitude());

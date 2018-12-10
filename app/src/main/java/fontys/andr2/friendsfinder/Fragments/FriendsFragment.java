@@ -26,8 +26,12 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 import fontys.andr2.friendsfinder.R;
 import fontys.andr2.friendsfinder.Users.User;
@@ -36,10 +40,9 @@ import fontys.andr2.friendsfinder.Users.User;
 public class FriendsFragment extends Fragment {
 
     ListView listView;
-    private DatabaseReference mDatabase;
     private User user;
     Genson genson = new Genson();
-    List<User> listUsers;
+    LinkedHashMap<String, User> listUsers;
     String[] names;
     String[] location;
     Geocoder gcd;
@@ -47,52 +50,41 @@ public class FriendsFragment extends Fragment {
 
     public FriendsFragment() {
         // Required empty public constructor
+        listUsers = new LinkedHashMap<>();
     }
 
+
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_friends, container, false);
-        listUsers = new ArrayList<>();
+
         gcd = new Geocoder(getContext(), Locale.getDefault());
         listView = v.findViewById(R.id.listviewfriends);
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
-        SharedPreferences sharedPref = getActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
-        String teste = sharedPref.getString("userData", "null");
-        Log.d("user created:", teste);
-        user = genson.deserialize(teste, User.class);
-        mDatabase.addValueEventListener
-                (new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                            String name = ds.child("name").getValue(String.class);
-                            String email = ds.child("email").getValue(String.class);
-                            Double latitude = ds.child("latitude").getValue(Double.class);
-                            Double longitude = ds.child("longitude").getValue(Double.class);
-                            String profilePicture = ds.child("profilePicture").getValue(String.class);
-                            Log.d("TAG", name + " / " + email + " / " + profilePicture);
-                            User user = new User (profilePicture,name,email);
-                            user.setLongitude(longitude);
-                            user.setLatitude(latitude);
-                            listUsers.add(user);
+        refreshListView();
 
-                        }
-                        CustomAdapter customAdapter = new CustomAdapter();
-                        listView.setAdapter(customAdapter);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-
-
-
-                });
+        SharedPreferences sharedPref = Objects.requireNonNull(getActivity()).getSharedPreferences("pref", Context.MODE_PRIVATE);
+        String jsonUser = sharedPref.getString("userData", "null");
+        Log.d("user created:", jsonUser);
+        this.user = genson.deserialize(jsonUser, User.class);
 
         return v;
+    }
+
+    public void refresh(HashMap<String, User> users) {
+        for (Map.Entry<String, User> user_entry : users.entrySet())
+        {
+            listUsers.put(user_entry.getKey(), user_entry.getValue());
+        }
+        if(listView!=null) refreshListView();
+
+    }
+
+    private void refreshListView(){
+        CustomAdapter customAdapter = new CustomAdapter();
+        listView.setAdapter(customAdapter);
     }
 
     class CustomAdapter extends BaseAdapter{
@@ -118,9 +110,9 @@ public class FriendsFragment extends Fragment {
             ImageView imageView = convertView.findViewById(R.id.profilePictureFriend);
             TextView textView_name = convertView.findViewById(R.id.name);
             TextView textView_location = convertView.findViewById(R.id.location);
-            Log.d("latitude and longitude",Double.toString(listUsers.get(i).getLatitude())+" "+Double.toString(listUsers.get(i).getLongitude()));
+            Log.d("latitude and longitude",Double.toString(getUserByIndex(i).getLatitude())+" "+Double.toString(getUserByIndex(i).getLongitude()));
             Picasso.with(getActivity())
-                    .load(listUsers.get(i).getProfilePicture())
+                    .load(getUserByIndex(i).getProfilePicture())
                     .into(imageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
@@ -133,19 +125,22 @@ public class FriendsFragment extends Fragment {
                         }
                     });
             try {
-                List<Address> addresses = gcd.getFromLocation(listUsers.get(i).getLatitude(),listUsers.get(i).getLongitude(),1);
+                List<Address> addresses = gcd.getFromLocation(getUserByIndex(i).getLatitude(),getUserByIndex(i).getLongitude(),1);
                 if (addresses.size() > 0) {
 
-                    Log.d("latitude and longitude", Double.toString(listUsers.get(i).getLatitude()) + " " + Double.toString(listUsers.get(i).getLongitude()));
+                    Log.d("latitude and longitude", Double.toString(getUserByIndex(i).getLatitude()) + " " + Double.toString(getUserByIndex(i).getLongitude()));
                     textView_location.setText(addresses.get(0).getLocality());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            textView_name.setText(listUsers.get(i).getName());
+            textView_name.setText(getUserByIndex(i).getName());
             return convertView;
         }
     }
 
+    public User getUserByIndex(int index){
+        return listUsers.get( (Objects.requireNonNull(listUsers.keySet().toArray()))[ index ] );
+    }
 
 }

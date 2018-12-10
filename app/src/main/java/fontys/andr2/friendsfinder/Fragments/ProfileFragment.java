@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Objects;
 
 import fontys.andr2.friendsfinder.R;
 import fontys.andr2.friendsfinder.Users.User;
@@ -37,10 +39,10 @@ public class ProfileFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        LayoutInflater lf = getActivity().getLayoutInflater();
+        LayoutInflater lf = Objects.requireNonNull(getActivity()).getLayoutInflater();
         View view =  lf.inflate(R.layout.fragment_profile, container, false);
         TextView textViewEmail = (TextView) view.findViewById(R.id.emailFragmentProfile);
         TextView textViewName = (TextView) view.findViewById(R.id.nameFragmentProfile);

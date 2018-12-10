@@ -1,10 +1,7 @@
 package fontys.andr2.friendsfinder;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -12,6 +9,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.MenuItem;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import fontys.andr2.friendsfinder.Fragments.FriendsFragment;
 import fontys.andr2.friendsfinder.Fragments.MapFragment;
@@ -23,6 +23,8 @@ public class MainActivity extends FragmentActivity {
 
     UsersAvailable usersAvailable;
     User user;
+    private DatabaseReference mDatabase;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +36,14 @@ public class MainActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_main);
 
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
+
+
         final ProfileFragment profileFragment = new ProfileFragment();
         final MapFragment mapFragment = new MapFragment();
         mapFragment.setActivity(this);
         final FriendsFragment friendsFragment = new FriendsFragment();
+
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -63,24 +69,14 @@ public class MainActivity extends FragmentActivity {
         usersAvailable.setRefreshListener(new UsersAvailable.RefreshListener() {
             @Override
             public void onRefresh() {
-                Log.i("MainActivity", usersAvailable.getAvailables().toString());
-                mapFragment.refresh(usersAvailable.getAvailables(), MainActivity.this);
+                Log.i("MainActivity", usersAvailable.getAvailable().toString());
+                mapFragment.refresh(usersAvailable.getAvailable(), MainActivity.this);
+                friendsFragment.refresh(usersAvailable.getAvailable());
             }
         });
-        startRefreshThread();
+        usersAvailable.setRefresh(mDatabase);
     }
 
-    private void startRefreshThread() {
-        final Handler handler = new Handler();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                usersAvailable.refreshAvailable();
-                Log.i("MainActivity", "Refreshed");
-                handler.postDelayed(this, 1000);
-            }
-        }).start();
-    }
 
     private void setFragment(Fragment fragment) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
