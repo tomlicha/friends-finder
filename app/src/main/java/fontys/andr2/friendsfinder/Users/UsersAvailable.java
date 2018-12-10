@@ -21,11 +21,11 @@ public class UsersAvailable {
     public void refreshAvailable (){
         usersAvailable.clear();
         usersAvailable.put("b4mamanch@enib.fr",
-                new User("http://ibb.co/K9Df28L".getBytes(), "Baptiste", "b4mamanch@enib.fr"));
+                new User("http://ibb.co/K9Df28L", "Baptiste", "b4mamanch@enib.fr"));
         usersAvailable.put("t4licha@enib.fr",
-                new User("http://ibb.co/RTgwp8t".getBytes(), "Tom", "t4licha@enib.fr"));
+                new User("http://ibb.co/RTgwp8t", "Tom", "t4licha@enib.fr"));
         usersAvailable.put("g4gary@enib.fr",
-                new User("http://ibb.co/r5Ymq3p".getBytes(), "Gary", "g4gary@enib.fr"));
+                new User("http://ibb.co/r5Ymq3p", "Gary", "g4gary@enib.fr"));
 
     }
     

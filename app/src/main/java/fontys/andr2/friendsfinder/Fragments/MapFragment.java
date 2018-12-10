@@ -33,7 +33,7 @@ import java.util.List;
 
 import fontys.andr2.friendsfinder.MyLocation;
 import fontys.andr2.friendsfinder.R;
-import fontys.andr2.friendsfinder.User;
+import fontys.andr2.friendsfinder.Users.User;
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.PermissionRequest;
 
