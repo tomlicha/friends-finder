@@ -70,7 +70,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onRefresh() {
                 Log.i("MainActivity", usersAvailable.getAvailable().toString());
-                mapFragment.refresh(usersAvailable.getAvailable(), MainActivity.this);
+                mapFragment.refresh(usersAvailable.getAvailable());
                 friendsFragment.refresh(usersAvailable.getAvailable());
             }
         });

@@ -30,6 +30,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -59,7 +62,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     private final static int LOCATION_REQUEST_ID = 0100;
     private GoogleMap mMap;
     private MyLocation myLocation;
-    private Genson genson= new Genson();
+    private Genson genson = new Genson();
 
     private User user;
 
@@ -67,7 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
     }
 
-    public void setActivity(FragmentActivity activity){
+    public void setActivity(FragmentActivity activity) {
         this.activity = activity;
     }
 
@@ -135,7 +138,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot tasksSnapshot) {
-                for (DataSnapshot snapshot: tasksSnapshot.getChildren()) {
+                for (DataSnapshot snapshot : tasksSnapshot.getChildren()) {
                     snapshot.getRef().child("latitude").setValue(user.getLatitude());
                     snapshot.getRef().child("longitude").setValue(user.getLongitude());
 
@@ -184,6 +187,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 Toast.LENGTH_LONG)
                 .show();
     }
+
     private GoogleMap.OnMyLocationButtonClickListener onMyLocationButtonClickListener =
             new GoogleMap.OnMyLocationButtonClickListener() {
                 @Override
@@ -210,33 +214,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 }
             };
 
-    public void refresh(HashMap<String, User> users, Activity activity){
-        if (mMap==null) return;
+    public void refresh(HashMap<String, User> users) {
+        if (mMap == null) return;
         mMap.clear();
-        for (Map.Entry<String, User> user_entry : users.entrySet())
-        {
+        for (Map.Entry<String, User> user_entry : users.entrySet()) {
             User user = user_entry.getValue();
-            addUserOnMap(activity, user);
+            addUserOnMap(user);
         }
     }
 
-    private void addUserOnMap(Activity activity, final User user) {
-//        final LatLng latLng = new LatLng(user.getLongitude(), user.getLatitude());
-//        final MarkerOptions options = new MarkerOptions().position(latLng);
-//        final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
-//        options.title("Ketan Ramani");
-//        options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
-//        mMap.addMarker(options);
-//
+    private void addUserOnMap(final User user) {
+        final LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
+        final MarkerOptions options = new MarkerOptions().position(latLng);
+        final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
+        options.title(user.getName());
+        options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+
+        mMap.addMarker(options);
 //        options.anchor(0.5f, 0.907f);
-//        activity.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(bitmap!=null){
-//                    mMap.addMarker(options);
-//                }
-//            }
-//        });
+
     }
 
     private Bitmap createUserBitmap(String user_image_url) {
@@ -274,7 +270,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
             canvas.restore();
             try {
                 canvas.setBitmap(null);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         } catch (Throwable t) {
             t.printStackTrace();
         }
