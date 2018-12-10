@@ -51,11 +51,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import fontys.andr2.friendsfinder.MainActivity;
 import fontys.andr2.friendsfinder.MyLocation;
 import fontys.andr2.friendsfinder.R;
 import fontys.andr2.friendsfinder.Users.User;
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.PermissionRequest;
+
+import static fontys.andr2.friendsfinder.MainActivity.usersAvailable;
 
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
@@ -66,7 +69,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     private MyLocation myLocation;
     private Genson genson = new Genson();
     LocationListener locationListenerGPS;
-
+    DatabaseReference mDatabase;
     private User user;
 
     public MapFragment() {
@@ -91,8 +94,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 final double longitude=location.getLongitude();
                 String msg="New Latitude: "+latitude + "New Longitude: "+longitude;
                 Toast.makeText(getContext(),msg,Toast.LENGTH_LONG).show();
-                DatabaseReference objRef = FirebaseDatabase.getInstance().getReference("Users");
-                Query pendingTasks = objRef.orderByChild("name").equalTo(user.getName());
+                mDatabase = FirebaseDatabase.getInstance().getReference("Users");
+                Query pendingTasks = mDatabase.orderByChild("name").equalTo(user.getName());
                 pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot tasksSnapshot) {
@@ -132,6 +135,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
         mMapFragment.getMapAsync(this);
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        Log.e("DEBUG", "onResume of HomeFragment");
+        if(mDatabase != null) usersAvailable.setRefresh(mDatabase);
+
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        Log.e("DEBUG", "OnPause of HomeFragment");
+        super.onPause();
     }
 
     private void checkEasyPermission() {
@@ -185,8 +202,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         myLocation = new MyLocation(getActivity());
         user.setLatitude(myLocation.getLatitude());
         user.setLongitude(myLocation.getLongitude());
-        DatabaseReference objRef = FirebaseDatabase.getInstance().getReference("Users");
-        Query pendingTasks = objRef.orderByChild("name").equalTo(user.getName());
+        mDatabase = FirebaseDatabase.getInstance().getReference("Users");
+        Query pendingTasks = mDatabase.orderByChild("name").equalTo(user.getName());
         pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot tasksSnapshot) {

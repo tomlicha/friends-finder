@@ -31,6 +31,7 @@ public class UsersAvailable {
     }
 
     public void setRefresh(DatabaseReference mDatabase){
+        usersAvailable.clear();
         mDatabase.addValueEventListener
                 (new ValueEventListener() {
                     @Override

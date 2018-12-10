@@ -21,7 +21,7 @@ import fontys.andr2.friendsfinder.Users.UsersAvailable;
 
 public class MainActivity extends FragmentActivity {
 
-    UsersAvailable usersAvailable;
+    public static UsersAvailable usersAvailable;
     User user;
     private DatabaseReference mDatabase;
 
