@@ -1,8 +1,20 @@
 package fontys.andr2.friendsfinder.Fragments;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,15 +26,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fontys.andr2.friendsfinder.R;
+import fontys.andr2.friendsfinder.Users.User;
+import fontys.andr2.friendsfinder.Users.UsersAvailable;
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.PermissionRequest;
 
@@ -94,8 +116,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
         // Add a marker in Sydney and move the camera
 
-
-
     }
 
     @Override
@@ -154,4 +174,81 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 }
             };
 
+    public void refresh(HashMap<String, User> users, Activity activity){
+        if (mMap==null) return;
+        mMap.clear();
+        for (Map.Entry<String, User> user_entry : users.entrySet())
+        {
+            User user = user_entry.getValue();
+            addUserOnMap(activity, user);
+        }
+    }
+
+    private void addUserOnMap(Activity activity, final User user) {
+        final LatLng latLng = new LatLng(user.getLongitude(), user.getLatitude());
+        final MarkerOptions options = new MarkerOptions().position(latLng);
+        final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
+        options.title("Ketan Ramani");
+        options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+        mMap.addMarker(options);
+
+        options.anchor(0.5f, 0.907f);
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if(bitmap!=null){
+//                    mMap.addMarker(options);
+//                }
+//            }
+//        });
+    }
+
+    private Bitmap createUserBitmap(String user_image_url) {
+        Bitmap result = null;
+        try {
+            result = Bitmap.createBitmap(dp(62), dp(76), Bitmap.Config.ARGB_8888);
+            result.eraseColor(Color.TRANSPARENT);
+            Canvas canvas = new Canvas(result);
+            Drawable drawable = getResources().getDrawable(R.drawable.ic_livepin);
+            drawable.setBounds(0, 0, dp(62), dp(76));
+            drawable.draw(canvas);
+
+            Paint roundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            RectF bitmapRect = new RectF();
+            canvas.save();
+
+            URL url = new URL(user_image_url);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            //Bitmap bitmap = BitmapFactory.decodeFile(path.toString()); /*generate bitmap here if your image comes from any url*/
+            if (bitmap != null) {
+                BitmapShader shader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                Matrix matrix = new Matrix();
+                float scale = dp(52) / (float) bitmap.getWidth();
+                matrix.postTranslate(dp(5), dp(5));
+                matrix.postScale(scale, scale);
+                roundPaint.setShader(shader);
+                shader.setLocalMatrix(matrix);
+                bitmapRect.set(dp(5), dp(5), dp(52 + 5), dp(52 + 5));
+                canvas.drawRoundRect(bitmapRect, dp(26), dp(26), roundPaint);
+            }
+            canvas.restore();
+            try {
+                canvas.setBitmap(null);
+            } catch (Exception e) {}
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return result;
+    }
+
+    public int dp(float value) {
+        if (value == 0) {
+            return 0;
+        }
+        return (int) Math.ceil(getResources().getDisplayMetrics().density * value);
+    }
 }

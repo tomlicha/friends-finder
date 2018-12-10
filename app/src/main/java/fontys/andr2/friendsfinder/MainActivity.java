@@ -64,6 +64,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onRefresh() {
                 Log.i("MainActivity", usersAvailable.getAvailables().toString());
+                mapFragment.refresh(usersAvailable.getAvailables(), MainActivity.this);
             }
         });
         startRefreshThread();
