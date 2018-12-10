@@ -20,9 +20,8 @@ import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 
-import fontys.andr2.friendsfinder.MainActivity;
 import fontys.andr2.friendsfinder.R;
-import fontys.andr2.friendsfinder.User;
+import fontys.andr2.friendsfinder.Users.User;
 
 
 public class ProfileFragment extends Fragment {

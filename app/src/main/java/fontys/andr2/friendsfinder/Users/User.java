@@ -1,11 +1,9 @@
-package fontys.andr2.friendsfinder;
+package fontys.andr2.friendsfinder.Users;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
-
 
 public class User{
-    private String profilePictureUri;
+    private byte[] profilePicture;
     private String name;
     private String email;
     private double latitude;
@@ -28,12 +26,12 @@ public class User{
         this.longitude = longitude;
     }
 
-    public String getProfilePicture() {
-        return profilePictureUri;
+    public byte[] getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setProfilePicture(String profilePicture) {
-        this.profilePictureUri = profilePicture;
+    public void setProfilePicture(byte[] profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public String getName() {
@@ -52,9 +50,9 @@ public class User{
         this.email = email;
     }
 
-    public User(String profilePictureUri, String name, String email) {
+    public User(byte[] profilePicture, String name, String email) {
 
-        this.profilePictureUri = profilePictureUri;
+        this.profilePicture = profilePicture;
         this.name = name;
         this.email = email;
         this.latitude=0.0;
