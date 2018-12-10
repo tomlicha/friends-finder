@@ -3,6 +3,7 @@ package fontys.andr2.friendsfinder.Fragments;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,16 +16,24 @@ import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,6 +43,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.owlike.genson.Genson;
+
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -42,9 +53,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fontys.andr2.friendsfinder.MyLocation;
 import fontys.andr2.friendsfinder.R;
 import fontys.andr2.friendsfinder.Users.User;
-import fontys.andr2.friendsfinder.Users.UsersAvailable;
+
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.PermissionRequest;
 
@@ -54,7 +66,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
     private final static int LOCATION_REQUEST_ID = 0100;
     private GoogleMap mMap;
-    Location location;
+    private MyLocation myLocation;
+    private Genson genson= new Genson();
+
+    private User user;
 
     public MapFragment() {
 
@@ -113,7 +128,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         mMap.setOnMyLocationClickListener(onMyLocationClickListener);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         checkEasyPermission();
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("pref", Context.MODE_PRIVATE);
+        String teste = sharedPref.getString("userData", "null");
+        Log.d("user created:", teste);
 
+
+        user = genson.deserialize(teste, User.class);
+        myLocation = new MyLocation(getActivity());
+        user.setLatitude(myLocation.getLatitude());
+        user.setLongitude(myLocation.getLongitude());
+        DatabaseReference objRef = FirebaseDatabase.getInstance().getReference("Users");
+        Query pendingTasks = objRef.orderByChild("name").equalTo(user.getName());
+        pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot tasksSnapshot) {
+                for (DataSnapshot snapshot: tasksSnapshot.getChildren()) {
+                    snapshot.getRef().child("latitude").setValue(user.getLatitude());
+                    snapshot.getRef().child("longitude").setValue(user.getLongitude());
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getMessage());
+
+            }
+
+
+        });
         // Add a marker in Sydney and move the camera
 
     }
@@ -161,7 +204,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 @Override
                 public void onMyLocationClick(@NonNull Location location) {
 
-
+/*
                     CircleOptions circleOptions = new CircleOptions();
                     circleOptions.center(new LatLng(location.getLatitude(),
                             location.getLongitude()));
@@ -170,7 +213,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                     circleOptions.fillColor(Color.RED);
                     circleOptions.strokeWidth(6);
 
-                    mMap.addCircle(circleOptions);
+                    mMap.addCircle(circleOptions);*/
                 }
             };
 

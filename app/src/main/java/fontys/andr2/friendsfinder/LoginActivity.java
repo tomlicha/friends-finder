@@ -25,10 +25,19 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.FirebaseError;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 
@@ -48,6 +57,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private String Userdata;
     private String email,fullname;
     private Bitmap profilePicture;
+    private LatLng latLng;
     private User user;
     private DatabaseReference mDatabase;
 // ...
@@ -61,7 +71,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         setContentView(R.layout.activity_login);
 
         //Used for OAuth - Start
-        mDatabase = FirebaseDatabase.getInstance().getReference("user");
+        mDatabase = FirebaseDatabase.getInstance().getReference("Users");
 
         //Show Token
         profilePic = findViewById(R.id.profile_image);
@@ -161,7 +171,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 final ImageView imgView = profilePic;
                 // Download photo and set to image
                 Context context = imgView.getContext();
-                Picasso.with(context).load(personPhoto).into(imgView);
+                //Picasso.with(context).load(personPhoto).into(imgView);
                 Picasso.with(this)
                         .load(personPhoto)
                         .into(imgView, new com.squareup.picasso.Callback() {
@@ -179,8 +189,30 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                         Log.e("user created : \n",user.getEmail()+user.getName());
                                         if (user!=null) {
                                             Userdata = genson.serialize(user);
-                                            String userId = mDatabase.push().getKey();
-                                            mDatabase.child(userId).setValue(Userdata);                                            SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
+                                            FirebaseDatabase.getInstance().getReference("Users").orderByChild("name").equalTo(user.getName()).addListenerForSingleValueEvent(
+                                                    new ValueEventListener() {
+                                                      @Override
+                                                      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                                          if (dataSnapshot.exists()) {
+                                                              Log.d("child exists", user.getName());
+                                                              Toast.makeText(getApplicationContext(),
+                                                                      "child already exists",
+                                                                      Toast.LENGTH_LONG)
+                                                                      .show();
+                                                          } else {
+                                                              mDatabase.push().setValue(user);
+
+                                                          }
+                                                          // do what you want
+                                                      }
+
+                                                      @Override
+                                                      public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                      }
+                                                  });
+                                            SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
                                             SharedPreferences.Editor editor = sharedPref.edit();
                                             editor.putString("userData", Userdata);
                                             editor.apply();
