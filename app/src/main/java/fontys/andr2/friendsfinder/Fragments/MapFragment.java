@@ -47,6 +47,7 @@ import com.owlike.genson.Genson;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,7 +173,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
             }
             locationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER,
-                    2000,
+                    500,
                     10, locationListenerGPS);
 
         }
@@ -300,6 +301,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         final MarkerOptions options = new MarkerOptions().position(latLng);
         final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
         options.title(user.getName());
+
+        //Add Distance Here!
+        double distanceFriend= CalculationByDistance(myLocation.getLatitude(), myLocation.getLongitude(), user.getLatitude(), user.getLongitude());
+        DecimalFormat decimalFormat = new DecimalFormat(".##");
+        options.snippet(decimalFormat.format(distanceFriend));
         options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
 
         mMap.addMarker(options);
@@ -355,5 +361,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
             return 0;
         }
         return (int) Math.ceil(getResources().getDisplayMetrics().density * value);
+    }
+
+    public double CalculationByDistance(double userLatitude, double userLongitude, double friendLatitude, double friendLongitude) {
+        int Radius = 6371;// radius of earth in Km
+        double lat1 = userLatitude;
+        double lat2 = friendLatitude;
+        double lon1 = userLongitude;
+        double lon2 = friendLongitude;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
+                * Math.sin(dLon / 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        double valueResult = Radius * c;
+        double km = valueResult / 1;
+        DecimalFormat newFormat = new DecimalFormat("####");
+        int kmInDec = Integer.valueOf(newFormat.format(km));
+        double meter = valueResult % 1000;
+        int meterInDec = Integer.valueOf(newFormat.format(meter));
+        Log.i("Radius Value", "" + valueResult + "   KM  " + kmInDec
+                + " Meter   " + meterInDec);
+
+        return Radius * c;
     }
 }
