@@ -35,7 +35,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,6 +51,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +67,7 @@ import pub.devrel.easypermissions.PermissionRequest;
 import static fontys.andr2.friendsfinder.MainActivity.usersAvailable;
 
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
+public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks,GoogleMap.OnMarkerClickListener {
     FragmentActivity activity;
     LocationManager locationManager;
     private final static int LOCATION_REQUEST_ID = 0100;
@@ -73,6 +77,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     LocationListener locationListenerGPS;
     DatabaseReference mDatabase;
     private User user;
+    Marker marker;
+    private HashMap<Marker,User> markerUserHashMap;
+    List<Polyline> polylines;
+
 
     public MapFragment() {
 
@@ -88,6 +96,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        markerUserHashMap = new HashMap<>();
+        polylines= new ArrayList<Polyline>();
         assert mMapFragment != null;
         locationListenerGPS=new LocationListener() {
             @Override
@@ -195,6 +205,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         mMap.setOnMyLocationButtonClickListener(onMyLocationButtonClickListener);
         mMap.setOnMyLocationClickListener(onMyLocationClickListener);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setOnMarkerClickListener(this);
         checkEasyPermission();
         SharedPreferences sharedPref = Objects.requireNonNull(getActivity()).getSharedPreferences("pref", Context.MODE_PRIVATE);
         String teste = sharedPref.getString("userData", "null");
@@ -298,17 +309,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
     private void addUserOnMap(final User user) {
         final LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
-        final MarkerOptions options = new MarkerOptions().position(latLng);
         final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
-        options.title(user.getName());
 
         //Add Distance Here!
         double distanceFriend= CalculationByDistance(myLocation.getLatitude(), myLocation.getLongitude(), user.getLatitude(), user.getLongitude());
         DecimalFormat decimalFormat = new DecimalFormat(".##");
-        options.snippet(decimalFormat.format(distanceFriend));
-        options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+        marker = mMap.addMarker(new MarkerOptions()
+            .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+            .position(latLng)
+            .title(user.getName())
+            .snippet(decimalFormat.format(distanceFriend)+" Km"));
+        if (marker != null && user != null)markerUserHashMap.put(marker,user);
 
-        mMap.addMarker(options);
 //        options.anchor(0.5f, 0.907f);
 
     }
@@ -386,5 +398,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 + " Meter   " + meterInDec);
 
         return Radius * c;
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        for(Polyline line : polylines)
+        {
+            line.remove();
+        }
+        polylines.clear();
+        System.out.println("Marker clicked "+marker.getTitle());
+        User user = markerUserHashMap.get(marker);
+        Polyline line = mMap.addPolyline(
+                new PolylineOptions().add(new LatLng(myLocation.getLatitude(),
+                                myLocation.getLongitude()),
+                        new LatLng(user.getLatitude(),
+                                user.getLongitude()))
+                        .width(5).color(Color.RED));
+        polylines.add(line);
+        return false;
     }
 }
