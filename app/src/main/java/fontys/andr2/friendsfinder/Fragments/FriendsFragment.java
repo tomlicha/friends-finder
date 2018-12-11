@@ -16,16 +16,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,8 +37,6 @@ public class FriendsFragment extends Fragment {
     private User user;
     Genson genson = new Genson();
     LinkedHashMap<String, User> listUsers;
-    String[] names;
-    String[] location;
     Geocoder gcd;
 
 

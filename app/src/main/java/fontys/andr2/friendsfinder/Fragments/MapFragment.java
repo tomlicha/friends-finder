@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -141,6 +142,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     public void onResume() {
         Log.e("DEBUG", "onResume of HomeFragment");
         if(mDatabase != null) usersAvailable.setRefresh(mDatabase);
+        if (user!=null) mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(user.getLatitude(),user.getLongitude()) , 14.0f) );
 
         super.onResume();
     }
@@ -223,7 +225,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
         });
 
-
+        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(user.getLatitude(),user.getLongitude()) , 14.0f) );
         // Add a marker in Sydney and move the camera
 
     }

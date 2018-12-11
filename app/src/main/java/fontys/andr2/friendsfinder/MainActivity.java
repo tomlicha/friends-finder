@@ -30,10 +30,6 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-
-       // profilepicture = (Bitmap) intent.getParcelableExtra("profilePicture");
-
         setContentView(R.layout.activity_main);
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
