@@ -3,53 +3,58 @@ package fontys.andr2.friendsfinder.Users;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.MalformedURLException;
+
 import static org.junit.Assert.*;
 
 public class UserTest {
 
     private User defaultUser;
-    private final String name = "Vinh";
-    private final String email = "n4truong@gmail.com";
-    private final double latitude = 10.0;
-    private final double longitude = 10.0;
+    private final String VALID_NAME = "Vinh";
+    private final String VALID_EMAIL = "n4truong@gmail.com";
+    private final String VALID_URL = "https://www.google.nl/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png";
+    private final double VALID_LATITUDE = 10.0;
+    private final double VALID_LONGITUDE = 10.0;
 
 
     @Before
-    public void setUp() throws ProfilePictureUriException {
-        defaultUser = new User("https://www.google.nl/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",  name,  email,  latitude,  longitude);
+    public void setUp() throws MalformedURLException {
+        defaultUser = new User(VALID_URL, VALID_NAME, VALID_EMAIL, VALID_LATITUDE, VALID_LONGITUDE);
     }
 
     //----------------------------------------------------------------//
 
     @Test
-    public void userHasName() throws ProfilePictureUriException {
-        assertEquals("The defaultUser has not a name", name, defaultUser.getName());
+    public void userHasName(){
+        assertEquals("The defaultUser has not a VALID_NAME", VALID_NAME, defaultUser.getName());
     }
 
     @Test
-    public void userHasEmail() throws ProfilePictureUriException {
-        assertEquals("The defaultUser has not an email", email, defaultUser.getEmail());
+    public void userHasEmail() {
+        assertEquals("The defaultUser has not an VALID_EMAIL", VALID_EMAIL, defaultUser.getEmail());
     }
 
     @Test
-    public void  userHasLatitudeAndLongitude() throws ProfilePictureUriException {
-        assertEquals("The defaultUser has not a latitude",latitude, defaultUser.getLatitude(),0);
-        assertEquals("The defaultUser has not a longitude",longitude, defaultUser.getLongitude(),0);
+    public void  userHasLatitudeAndLongitude() {
+        assertEquals("The defaultUser has not a VALID_LATITUDE", VALID_LATITUDE, defaultUser.getLatitude(),0);
+        assertEquals("The defaultUser has not a VALID_LONGITUDE", VALID_LONGITUDE, defaultUser.getLongitude(),0);
     }
 
     @Test
-    public void longitudeAndLagitudeUpdateOK() throws ProfilePictureUriException {
-        User user = new User("",  name,  email,  latitude,  longitude);
+    public void longitudeAndLatitudeUpdateOK() {
         double newLatitude = 20.0;
         double newLongitude = 20.0;
-        user.updateMyPosition(newLatitude,newLongitude);
-        assertEquals("The latitude's defaultUser has not been updated",newLatitude, user.getLatitude(),0);
-        assertEquals("The longitude's defaultUser has not been updated",newLongitude, user.getLongitude(),0);
+        defaultUser.updateMyPosition(newLatitude,newLongitude);
+        assertEquals("The VALID_LATITUDE's defaultUser has not been updated",newLatitude, defaultUser.getLatitude(),0);
+        assertEquals("The VALID_LONGITUDE's defaultUser has not been updated",newLongitude, defaultUser.getLongitude(),0);
     }
 
-    @Test(expected = ProfilePictureUriException.class)
-    public void profilePictureUriIsWebURL()throws ProfilePictureUriException{
-        new User("test",  name,  email,  latitude,  longitude);
+    //----------------------------------------------------------------//
+
+
+    @Test(expected = MalformedURLException.class)
+    public void profilePictureUriIsWebURL()throws MalformedURLException{
+        new User("test", VALID_NAME, VALID_EMAIL, VALID_LATITUDE, VALID_LONGITUDE);
     }
 
 
