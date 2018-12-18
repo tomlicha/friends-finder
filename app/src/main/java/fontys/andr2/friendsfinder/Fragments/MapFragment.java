@@ -2,6 +2,8 @@ package fontys.andr2.friendsfinder.Fragments;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -18,11 +20,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,13 +77,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     private final static int LOCATION_REQUEST_ID = 0100;
     private GoogleMap mMap;
     private MyLocation myLocation;
+    private String CHANNEL_ID;
+    private int notificationID;
     private Genson genson = new Genson();
+    private static HashMap<String, Boolean> notificationChecker;
     LocationListener locationListenerGPS;
     DatabaseReference mDatabase;
     private User user;
     Marker marker;
     private HashMap<Marker,User> markerUserHashMap;
     List<Polyline> polylines;
+
 
 
     public MapFragment() {
@@ -98,6 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         markerUserHashMap = new HashMap<>();
         polylines= new ArrayList<Polyline>();
+        notificationChecker= new HashMap<String, Boolean>();
         assert mMapFragment != null;
         locationListenerGPS=new LocationListener() {
             @Override
@@ -146,6 +155,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
 
         mMapFragment.getMapAsync(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CHANNEL_ID = "Channel_id";
+            CharSequence name = "NotificationDistance";
+            String description = "Notification Distance";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
         return v;
     }
 
@@ -307,22 +329,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         }
     }
 
-    private void addUserOnMap(final User user) {
-        final LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
-        final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
+    private void addUserOnMap(final User userfriends) {
+        final LatLng latLng = new LatLng(userfriends.getLatitude(), userfriends.getLongitude());
+        final Bitmap bitmap = createUserBitmap(userfriends.getProfilePicture());
 
         //Add Distance Here!
-        double distanceFriend= CalculationByDistance(myLocation.getLatitude(), myLocation.getLongitude(), user.getLatitude(), user.getLongitude());
+        double distanceFriend= CalculationByDistance(myLocation.getLatitude(), myLocation.getLongitude(), userfriends.getLatitude(), userfriends.getLongitude());
         DecimalFormat decimalFormat = new DecimalFormat(".##");
         marker = mMap.addMarker(new MarkerOptions()
             .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
             .position(latLng)
-            .title(user.getName())
+            .title(userfriends.getName())
             .snippet(decimalFormat.format(distanceFriend)+" Km"));
-        if (marker != null && user != null)markerUserHashMap.put(marker,user);
+        if (marker != null && userfriends != null)markerUserHashMap.put(marker,userfriends);
 
 //        options.anchor(0.5f, 0.907f);
 
+        //Add Notification Here!
+        notificationID = userfriends.getName().hashCode();
+        Boolean alreadyNotified = notificationChecker.get(userfriends.getName());
+        if(alreadyNotified==null)alreadyNotified = false;
+        if(!user.getName().equals(userfriends.getName())){
+            if(distanceFriend <= 0.03 && !alreadyNotified){
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                        .setContentTitle(userfriends.getName())
+                        .setContentText(userfriends.getName() + "is nearby")
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                notificationChecker.put(userfriends.getName(), true);
+
+                NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(notificationID, mBuilder.build());
+            }
+            else if(distanceFriend > 0.022 && alreadyNotified){
+                notificationChecker.put(userfriends.getName(), false);
+            }
+        }
     }
 
     private Bitmap createUserBitmap(String user_image_url) {

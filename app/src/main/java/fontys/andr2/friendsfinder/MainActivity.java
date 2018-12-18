@@ -7,6 +7,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -24,7 +25,6 @@ public class MainActivity extends FragmentActivity {
     public static UsersAvailable usersAvailable;
     User user;
     private DatabaseReference mDatabase;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,5 +79,4 @@ public class MainActivity extends FragmentActivity {
         fragmentTransaction.replace(R.id.frame_main, fragment);
         fragmentTransaction.commit();
     }
-
 }
