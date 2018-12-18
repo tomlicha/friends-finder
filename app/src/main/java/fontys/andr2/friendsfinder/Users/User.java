@@ -10,8 +10,8 @@ public class User{
     private double latitude;
     private double longitude;
 
-    public User(String profilePictureUri, String name, String email, double latitude, double longitude) {
-        this.profilePictureUri = profilePictureUri;
+    public User(String profilePictureUri, String name, String email, double latitude, double longitude) throws ProfilePictureUriException {
+        setProfilePicture(profilePictureUri);
         this.name = name;
         this.email = email;
         this.latitude = latitude;
@@ -22,7 +22,8 @@ public class User{
         return profilePictureUri;
     }
 
-    public void setProfilePicture(String profilePicture) {
+    public void setProfilePicture(String profilePicture)  throws ProfilePictureUriException{
+
         this.profilePictureUri = profilePicture;
     }
 
