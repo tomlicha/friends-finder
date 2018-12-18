@@ -46,7 +46,7 @@ public class UsersAvailable {
                             User user = new User (profilePicture,name,email);
                             user.setLongitude(longitude);
                             user.setLatitude(latitude);
-                            usersAvailable.put(email, user);
+                            addUser(user);
                         }
                         if(refreshListener!=null) refreshListener.onRefresh();
                     }
@@ -61,6 +61,18 @@ public class UsersAvailable {
 
     public void setRefreshListener(RefreshListener refreshListener) {
         this.refreshListener = refreshListener;
+    }
+
+    public void addUser(User newUser) {
+        usersAvailable.put(newUser.getEmail(), newUser);
+    }
+
+    public int getNumberOfUsers() {
+        return usersAvailable.size();
+    }
+
+    public RefreshListener getRefreshListener() {
+        return refreshListener;
     }
 
     public interface RefreshListener{
