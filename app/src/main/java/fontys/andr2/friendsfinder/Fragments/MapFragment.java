@@ -33,6 +33,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -67,7 +68,7 @@ import pub.devrel.easypermissions.PermissionRequest;
 import static fontys.andr2.friendsfinder.MainActivity.usersAvailable;
 
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks,GoogleMap.OnMarkerClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPermissions.PermissionCallbacks, GoogleMap.OnMarkerClickListener {
     FragmentActivity activity;
     LocationManager locationManager;
     private final static int LOCATION_REQUEST_ID = 0100;
@@ -78,7 +79,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     DatabaseReference mDatabase;
     private User user;
     Marker marker;
-    private HashMap<Marker,User> markerUserHashMap;
+    private HashMap<Marker, User> markerUserHashMap;
     List<Polyline> polylines;
 
 
@@ -97,15 +98,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         markerUserHashMap = new HashMap<>();
-        polylines= new ArrayList<Polyline>();
+        polylines = new ArrayList<Polyline>();
         assert mMapFragment != null;
-        locationListenerGPS=new LocationListener() {
+        locationListenerGPS = new LocationListener() {
             @Override
             public void onLocationChanged(android.location.Location location) {
-                final double latitude=location.getLatitude();
-                final double longitude=location.getLongitude();
-                String msg="New Latitude: "+latitude + "New Longitude: "+longitude;
-                Toast.makeText(getContext(),msg,Toast.LENGTH_LONG).show();
+                final double latitude = location.getLatitude();
+                final double longitude = location.getLongitude();
+                String msg = "New Latitude: " + latitude + "New Longitude: " + longitude;
+                Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
                 mDatabase = FirebaseDatabase.getInstance().getReference("Users");
                 Query pendingTasks = mDatabase.orderByChild("name").equalTo(user.getName());
                 pendingTasks.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -152,8 +153,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     @Override
     public void onResume() {
         Log.e("DEBUG", "onResume of HomeFragment");
-        if(mDatabase != null) usersAvailable.setRefresh(mDatabase);
-        if (user!=null) mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(user.getLatitude(),user.getLongitude()) , 14.0f) );
+        if (mDatabase != null) usersAvailable.setRefresh(mDatabase);
+        if (user != null)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(user.getLatitude(), user.getLongitude()), 14.0f));
 
         super.onResume();
     }
@@ -181,8 +183,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                         .show();
                 return;
             }
-            locationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-            locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER,
+            locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     500,
                     10, locationListenerGPS);
 
@@ -237,7 +239,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
         });
 
-        mMap.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(user.getLatitude(),user.getLongitude()) , 14.0f) );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(user.getLatitude(), user.getLongitude()), 14.0f));
         // Add a marker in Sydney and move the camera
 
     }
@@ -312,14 +314,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
 
         //Add Distance Here!
-        double distanceFriend= CalculationByDistance(myLocation.getLatitude(), myLocation.getLongitude(), user.getLatitude(), user.getLongitude());
+        double distanceFriend = CalculationByDistance(myLocation.getLatitude(), myLocation.getLongitude(), user.getLatitude(), user.getLongitude());
         DecimalFormat decimalFormat = new DecimalFormat(".##");
-        marker = mMap.addMarker(new MarkerOptions()
-            .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-            .position(latLng)
-            .title(user.getName())
-            .snippet(decimalFormat.format(distanceFriend)+" Km"));
-        if (marker != null && user != null)markerUserHashMap.put(marker,user);
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                .title(user.getName())
+                .snippet(decimalFormat.format(distanceFriend) + " Km");
+        if (bitmap!=null){
+            BitmapDescriptor bmDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap);
+            markerOptions.icon(bmDescriptor);
+        }else{
+            System.err.println("User "+user.getName()+" -> Impossible to retrieve image");
+        }
+        marker = mMap.addMarker(markerOptions);
+        if (marker != null && user != null) markerUserHashMap.put(marker, user);
 
 //        options.anchor(0.5f, 0.907f);
 
@@ -402,12 +410,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        for(Polyline line : polylines)
-        {
+        for (Polyline line : polylines) {
             line.remove();
         }
         polylines.clear();
-        System.out.println("Marker clicked "+marker.getTitle());
+        System.out.println("Marker clicked " + marker.getTitle());
         User user = markerUserHashMap.get(marker);
         Polyline line = mMap.addPolyline(
                 new PolylineOptions().add(new LatLng(myLocation.getLatitude(),
