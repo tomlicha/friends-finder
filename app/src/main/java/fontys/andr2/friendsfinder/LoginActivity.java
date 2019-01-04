@@ -27,18 +27,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.FirebaseError;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
 import com.owlike.genson.Genson;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 
@@ -188,11 +183,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
                                 byteArray = bStream.toByteArray();
                                 user.setProfilePicture(personPhoto.toString());
-                                runUserConnectedThread();
+                                afterConnect();
                             }
 
                             @Override
                             public void onError() {
+                                afterConnect();
                             }
                         });
                 Log.e("\nintent extras : ", email + fullname);
@@ -204,8 +200,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
-    private void runUserConnectedThread() {
-        new Thread(new Runnable() {
+    private void afterConnect() {
+        startMapButton.setVisibility(View.VISIBLE);
+
+        Thread th = new Thread(new Runnable() {
             public void run() {
                 Log.e("user created : \n", user.getEmail() + user.getName());
                 if (user != null) {
@@ -237,21 +235,16 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("userData", Userdata);
                     editor.apply();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            startMapButton.setVisibility(View.VISIBLE);
-                        }
-                    });
                 }
 
             }
-        }).start();
-
+        });
+        th.start();
     }
 
 
     private void signOut() {
+        startMapButton.setVisibility(View.INVISIBLE);
 
         Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
             @Override

@@ -12,12 +12,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.TimeUnit;
+
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.not;
@@ -27,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(AndroidJUnit4.class)
 public class LoginActivityTest {
+    private static final long CONNECT_TIME = 500;
     private final String VALID_EMAIL = "email@mock.com";
     private final String VALID_FIRSTNAME = "Mocked";
     private final String VALID_LASTNAME = "User";
@@ -41,13 +45,32 @@ public class LoginActivityTest {
     public GrantPermissionRule permissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
     @Test
-    public void startMapNotClickableByDefault() {
-        onView(withId(R.id.btn_start_map)).check(matches(not(isClickable())));
+    public void startMapBtnInvisibleByDefault() {
+        onView(withId(R.id.btn_start_map)).check(matches(not(isDisplayed())));
     }
+
+    @Test
+    public void startMapBtnVisibleAfterConnect() throws Throwable {
+        mockConnect();
+        TimeUnit.MILLISECONDS.sleep(CONNECT_TIME);
+        onView(withId(R.id.btn_start_map)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void startMapBtnInvisibleAfterDisconnect() throws Throwable {
+        mockConnect();
+        TimeUnit.MILLISECONDS.sleep(CONNECT_TIME);
+        onView(withId(R.id.sign_out_button)).perform(click());
+
+        TimeUnit.MILLISECONDS.sleep(CONNECT_TIME);
+        onView(withId(R.id.btn_start_map)).check(matches(not(isDisplayed())));
+    }
+
 
     @Test
     public void assertUserConnect() throws Throwable {
         mockConnect();
+
         onView(withId(R.id.email_view)).check(matches(withText(containsString(VALID_EMAIL))));
         onView(withId(R.id.name_view)).check(matches(withText(containsString(VALID_DISPLAYNAME))));
         onView(withId(R.id.btn_start_map)).check(matches(isClickable()));
@@ -56,9 +79,12 @@ public class LoginActivityTest {
     @Test
     public void launchMapAfterConnect() throws Throwable {
         mockConnect();
+        TimeUnit.MILLISECONDS.sleep(CONNECT_TIME);
         onView(withId(R.id.btn_start_map)).perform(click());
         intended(hasComponent(MainActivity.class.getName()));
     }
+
+
 
     // END OF TEST
 
