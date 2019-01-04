@@ -310,6 +310,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     }
 
     private void addUserOnMap(final User user) {
+        if(myLocation==null) return;
         final LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
         final Bitmap bitmap = createUserBitmap(user.getProfilePicture());
 
