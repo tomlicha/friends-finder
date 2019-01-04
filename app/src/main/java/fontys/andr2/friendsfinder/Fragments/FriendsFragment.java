@@ -105,7 +105,7 @@ public class FriendsFragment extends Fragment {
             Log.d("latitude and longitude",Double.toString(getUserByIndex(i).getLatitude())+" "+Double.toString(getUserByIndex(i).getLongitude()));
             String image = getUserByIndex(i).getProfilePicture();
             if (image.isEmpty()) {
-                imageView.setImageResource(R.drawable.user_ic);
+                imageView.setImageResource(R.drawable.user_ic); //TOM BOLOSS
             } else{
                 Picasso.with(getActivity())
                         .load(image)
