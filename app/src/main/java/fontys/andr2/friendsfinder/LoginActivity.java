@@ -187,7 +187,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 ByteArrayOutputStream bStream = new ByteArrayOutputStream();
                                 profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
                                 byteArray = bStream.toByteArray();
-                                user.setProfilePicture(profilePicture.toString());
+                                user.setProfilePicture(personPhoto.toString());
                                 runUserConnectedThread();
                             }
 
