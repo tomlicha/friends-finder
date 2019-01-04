@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,20 +48,22 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private static final int RC_SIGN_IN = 9001;
 
+    private Button startMapButton;
+
     private GoogleApiClient googleApiClient;
-    public static final String MyPREFERENCES = "MyPrefs" ;
+    public static final String MyPREFERENCES = "MyPrefs";
 
     private ImageView profilePic;
     private TextView fullnameTextView;
     private TextView emailTextView;
-    private Genson genson= new Genson();
+    private Genson genson = new Genson();
     private String Userdata;
-    private String email,fullname;
+    private String email, fullname;
     private Bitmap profilePicture;
     private LatLng latLng;
     private User user;
     private DatabaseReference mDatabase;
-// ...
+    // ...
     byte[] byteArray;
     //Used for OAuth - End
 
@@ -77,7 +80,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         profilePic = findViewById(R.id.profile_image);
         fullnameTextView = findViewById(R.id.name_view);
         emailTextView = findViewById(R.id.email_view);
-
+        startMapButton = (Button) findViewById(R.id.btn_start_map);
+        startMapButton.setVisibility(View.INVISIBLE);
 
         //OnClickListener
         findViewById(R.id.sign_in_button).setOnClickListener(this);
@@ -157,11 +161,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d("result received :", " " + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            Log.d("user received :",  account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName() + "url picture :"+account.getPhotoUrl());
-            email =account.getEmail();
+            Log.d("user received :", account.getDisplayName() + account.getEmail() + account.getFamilyName() + account.getGivenName() + "url picture :" + account.getPhotoUrl());
+            email = account.getEmail();
             fullname = account.getDisplayName();
             emailTextView.setText("email : " + account.getEmail());
-            fullnameTextView.setText("Hello "+account.getDisplayName());
+            fullnameTextView.setText("Hello " + account.getDisplayName());
             emailTextView.setVisibility(View.VISIBLE);
             fullnameTextView.setVisibility(View.VISIBLE);
             final Uri personPhoto = account.getPhotoUrl();
@@ -172,69 +176,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 // Download photo and set to image
                 Context context = imgView.getContext();
                 //Picasso.with(context).load(personPhoto).into(imgView);
+                user = new User("", fullname, email);
+
                 Picasso.with(this)
                         .load(personPhoto)
                         .into(imgView, new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
-                                profilePicture = ((BitmapDrawable)imgView.getDrawable()).getBitmap();
+                                profilePicture = ((BitmapDrawable) imgView.getDrawable()).getBitmap();
                                 ByteArrayOutputStream bStream = new ByteArrayOutputStream();
                                 profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
                                 byteArray = bStream.toByteArray();
-
-                                Log.e("\nintent extras : ",email + fullname);
-                                new Thread(new Runnable() {
-                                    public void run() {
-                                        user = new User(personPhoto.toString(),fullname,email);
-                                        Log.e("user created : \n",user.getEmail()+user.getName());
-                                        if (user!=null) {
-                                            Userdata = genson.serialize(user);
-                                            FirebaseDatabase.getInstance().getReference("Users").orderByChild("name").equalTo(user.getName()).addListenerForSingleValueEvent(
-                                                    new ValueEventListener() {
-                                                      @Override
-                                                      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                                                          if (dataSnapshot.exists()) {
-                                                              Log.d("child exists", user.getName());
-                                                              Toast.makeText(getApplicationContext(),
-                                                                      "child already exists",
-                                                                      Toast.LENGTH_LONG)
-                                                                      .show();
-                                                          } else {
-                                                              mDatabase.push().setValue(user);
-
-                                                          }
-                                                          // do what you want
-                                                      }
-
-                                                      @Override
-                                                      public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                      }
-                                                  });
-                                            SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
-                                            SharedPreferences.Editor editor = sharedPref.edit();
-                                            editor.putString("userData", Userdata);
-                                            editor.apply();
-
-
-                                        }
-
-                                    }
-                                }).start();
-
-
+                                user.setProfilePicture(profilePicture.toString());
+                                runUserConnectedThread();
                             }
 
                             @Override
                             public void onError() {
-
                             }
-
-
                         });
+                Log.e("\nintent extras : ", email + fullname);
             }
-
 
         } else {
             Log.d("login failed :", " " + result.getStatus());
@@ -242,13 +204,59 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
+    private void runUserConnectedThread() {
+        new Thread(new Runnable() {
+            public void run() {
+                Log.e("user created : \n", user.getEmail() + user.getName());
+                if (user != null) {
+                    Userdata = genson.serialize(user);
+                    FirebaseDatabase.getInstance().getReference("Users").orderByChild("name").equalTo(user.getName()).addListenerForSingleValueEvent(
+                            new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-    private void signOut () {
+                                    if (dataSnapshot.exists()) {
+                                        Log.d("child exists", user.getName());
+                                        Toast.makeText(getApplicationContext(),
+                                                "child already exists",
+                                                Toast.LENGTH_LONG)
+                                                .show();
+                                    } else {
+                                        mDatabase.push().setValue(user);
+
+                                    }
+                                    // do what you want
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                    SharedPreferences sharedPref = getSharedPreferences("pref", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("userData", Userdata);
+                    editor.apply();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startMapButton.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }
+
+            }
+        }).start();
+
+    }
+
+
+    private void signOut() {
 
         Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallbacks<Status>() {
             @Override
             public void onSuccess(@NonNull Status status) {
-               Toast.makeText(getApplication(),"Successfuly signed out",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplication(), "Successfuly signed out", Toast.LENGTH_SHORT).show();
                 emailTextView.setVisibility(View.GONE);
                 fullnameTextView.setVisibility(View.GONE);
                 findViewById(R.id.sign_out_button).setVisibility(View.GONE);
@@ -259,22 +267,22 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
             @Override
             public void onFailure(@NonNull Status status) {
-                Log.e("statut : ",status.toString());
+                Log.e("statut : ", status.toString());
             }
         });
     }
 
 
-            @Override
-            public void onConnectionFailed (@NonNull ConnectionResult connectionResult){
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-            }
+    }
 
-            @Override
-            public void onPointerCaptureChanged ( boolean hasCapture){
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
 
-            }
+    }
 
 
-        }
+}
 
