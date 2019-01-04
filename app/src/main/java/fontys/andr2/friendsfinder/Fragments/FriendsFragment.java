@@ -103,19 +103,25 @@ public class FriendsFragment extends Fragment {
             TextView textView_name = convertView.findViewById(R.id.name);
             TextView textView_location = convertView.findViewById(R.id.location);
             Log.d("latitude and longitude",Double.toString(getUserByIndex(i).getLatitude())+" "+Double.toString(getUserByIndex(i).getLongitude()));
-            Picasso.with(getActivity())
-                    .load(getUserByIndex(i).getProfilePicture())
-                    .into(imageView, new com.squareup.picasso.Callback() {
-                        @Override
-                        public void onSuccess() {
+            String image = getUserByIndex(i).getProfilePicture();
+            if (image.isEmpty()) {
+                imageView.setImageResource(R.drawable.user_ic);
+            } else{
+                Picasso.with(getActivity())
+                        .load(image)
+                        .into(imageView, new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
 
-                        }
+                            }
 
-                        @Override
-                        public void onError() {
+                            @Override
+                            public void onError() {
 
-                        }
-                    });
+                            }
+                        });
+            }
+
             try {
                 List<Address> addresses = gcd.getFromLocation(getUserByIndex(i).getLatitude(),getUserByIndex(i).getLongitude(),1);
                 if (addresses.size() > 0) {
