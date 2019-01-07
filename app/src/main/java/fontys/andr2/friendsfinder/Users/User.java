@@ -2,6 +2,10 @@ package fontys.andr2.friendsfinder.Users;
 
 import android.graphics.Bitmap;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.MalformedInputException;
+
 public class User{
 
     private String profilePictureUri;
@@ -10,8 +14,8 @@ public class User{
     private double latitude;
     private double longitude;
 
-    public User(String profilePictureUri, String name, String email, double latitude, double longitude) {
-        this.profilePictureUri = profilePictureUri;
+    public User(String profilePictureUri, String name, String email, double latitude, double longitude) throws MalformedURLException {
+        setProfilePicture(profilePictureUri);
         this.name = name;
         this.email = email;
         this.latitude = latitude;
@@ -22,7 +26,8 @@ public class User{
         return profilePictureUri;
     }
 
-    public void setProfilePicture(String profilePicture) {
+    public void setProfilePicture(String profilePicture) throws MalformedURLException {
+        new URL(profilePicture); //Calling URL builder to check if the string is in a proper URL format
         this.profilePictureUri = profilePicture;
     }
 
@@ -78,6 +83,10 @@ public class User{
     public void updateMyPosition(double latitude, double longitude) {
         this.longitude = longitude;
         this.latitude = latitude;
+    }
+
+    public void setEmptyProfilePicture() {
+        profilePictureUri = "";
     }
 }
 
