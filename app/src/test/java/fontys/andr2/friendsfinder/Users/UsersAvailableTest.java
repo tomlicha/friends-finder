@@ -1,15 +1,21 @@
 package fontys.andr2.friendsfinder.Users;
 
+import com.google.firebase.database.DatabaseReference;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class UsersAvailableTest {
 
@@ -52,8 +58,27 @@ public class UsersAvailableTest {
     }
 
     @Test
-    public void RefreshListenerIsCalledInSetRefresh(){
+    public void verifyThatUserAvailableClearInSetRefreshMethod() {
+        HashMap<String,User> usersAvailable = spy(new HashMap<String,User>());
+        defaultUserAvailable.setUsersAvailable(usersAvailable);
+        DatabaseReference dummyDb = mock(DatabaseReference.class);
 
+        defaultUserAvailable.setRefresh(dummyDb);
+        verify(usersAvailable, times(1)).clear();
+    }
+
+    @Test
+    public void SetRefreshListenerIsCalled(){
+
+        UsersAvailable.RefreshListener refreshListener = new UsersAvailable.RefreshListener() {
+            @Override
+            public void onRefresh() {
+
+            }
+        };
+        defaultUserAvailable.setRefreshListener(refreshListener);
+
+        assertEquals("the refresh listener is not the same", refreshListener  , defaultUserAvailable.getRefreshListener() );
     }
 
     @Test

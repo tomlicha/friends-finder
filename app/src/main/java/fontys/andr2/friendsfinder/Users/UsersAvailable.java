@@ -79,4 +79,9 @@ public class UsersAvailable {
         void onRefresh();
     }
 
+    //Used for test
+
+    void setUsersAvailable(HashMap<String, User> usersAvailable) {
+        this.usersAvailable = usersAvailable;
+    }
 }
