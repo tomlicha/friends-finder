@@ -25,13 +25,6 @@ stages:
   - build
   - test
 
-lintDebug:
-  stage: build
-  script:
-    - ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint
-  only:
-    - master
-
 assembleDebug:
   stage: build
   script:
