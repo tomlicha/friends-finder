@@ -81,6 +81,7 @@ public class LoginActivityTest {
         mockConnect();
         TimeUnit.MILLISECONDS.sleep(CONNECT_TIME);
         onView(withId(R.id.btn_start_map)).perform(click());
+        TimeUnit.MILLISECONDS.sleep(CONNECT_TIME);
         intended(hasComponent(MainActivity.class.getName()));
     }
 

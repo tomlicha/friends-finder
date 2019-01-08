@@ -18,7 +18,7 @@ public class UserTest {
 
 
     @Before
-    public void setUp() throws MalformedURLException {
+    public void setUp() {
         defaultUser = new User(VALID_URL, VALID_NAME, VALID_EMAIL, VALID_LATITUDE, VALID_LONGITUDE);
     }
 
@@ -51,11 +51,6 @@ public class UserTest {
 
     //----------------------------------------------------------------//
 
-
-    @Test(expected = MalformedURLException.class)
-    public void profilePictureUriIsWebURL()throws MalformedURLException{
-        new User("test", VALID_NAME, VALID_EMAIL, VALID_LATITUDE, VALID_LONGITUDE);
-    }
 
 
 }
