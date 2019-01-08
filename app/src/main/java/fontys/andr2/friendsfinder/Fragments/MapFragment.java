@@ -20,6 +20,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -35,6 +36,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -74,6 +76,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
     private final static int LOCATION_REQUEST_ID = 0100;
     private GoogleMap mMap;
     private MyLocation myLocation;
+    private FloatingActionButton findMe;
     private Genson genson = new Genson();
     LocationListener locationListenerGPS;
     DatabaseReference mDatabase;
@@ -100,6 +103,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         markerUserHashMap = new HashMap<>();
         polylines = new ArrayList<Polyline>();
         assert mMapFragment != null;
+        findMe = v.findViewById(R.id.findme);
+        findMe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(new LatLng(user.getLatitude(), user.getLongitude())) // Sets the center of the map to Mountain View
+                        .zoom(17)                   // Sets the zoom
+                        .bearing(0)                // Sets the orientation of the camera to east
+                        .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                        .build();                   // Creates a CameraPosition from the builder
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
+            }
+        });
+
+
         locationListenerGPS = new LocationListener() {
             @Override
             public void onLocationChanged(android.location.Location location) {
@@ -377,6 +397,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         return result;
     }
 
+
     public int dp(float value) {
         if (value == 0) {
             return 0;
@@ -426,4 +447,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         polylines.add(line);
         return false;
     }
+
+
+
 }
