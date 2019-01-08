@@ -37,6 +37,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import fontys.andr2.friendsfinder.Users.User;
 
@@ -184,6 +185,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 profilePicture.compress(Bitmap.CompressFormat.PNG, 100, bStream);
                                 byteArray = bStream.toByteArray();
                                 try {
+                                    new URL(personPhoto.toString());
                                     user.setProfilePicture(personPhoto.toString());
                                 } catch (MalformedURLException e) {
                                     user.setEmptyProfilePicture();

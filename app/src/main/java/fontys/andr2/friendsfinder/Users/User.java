@@ -14,7 +14,7 @@ public class User{
     private double latitude;
     private double longitude;
 
-    public User(String profilePictureUri, String name, String email, double latitude, double longitude) throws MalformedURLException {
+    public User(String profilePictureUri, String name, String email, double latitude, double longitude) {
         setProfilePicture(profilePictureUri);
         this.name = name;
         this.email = email;
@@ -26,8 +26,7 @@ public class User{
         return profilePictureUri;
     }
 
-    public void setProfilePicture(String profilePicture) throws MalformedURLException {
-        new URL(profilePicture); //Calling URL builder to check if the string is in a proper URL format
+    public void setProfilePicture(String profilePicture){
         this.profilePictureUri = profilePicture;
     }
 
