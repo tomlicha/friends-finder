@@ -144,7 +144,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                         for (DataSnapshot snapshot : tasksSnapshot.getChildren()) {
                             snapshot.getRef().child("latitude").setValue(latitude);
                             snapshot.getRef().child("longitude").setValue(longitude);
-
+                            myLocation = new MyLocation(getActivity());
                         }
                     }
 
