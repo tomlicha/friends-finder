@@ -22,6 +22,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -95,6 +97,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
 
 
     public MapFragment() {
+        notificationChecker= new HashMap<String, Boolean>();
 
     }
 
@@ -110,7 +113,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         markerUserHashMap = new HashMap<>();
         polylines= new ArrayList<Polyline>();
-        notificationChecker= new HashMap<String, Boolean>();
         assert mMapFragment != null;
         findMe = v.findViewById(R.id.findme);
         findMe.setOnClickListener(new View.OnClickListener() {
@@ -381,14 +383,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_notifications_black_24dp)
                         .setContentTitle(userfriends.getName())
-                        .setContentText(userfriends.getName() + "is nearby")
+                        .setContentText(userfriends.getName() + " is nearby")
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT);
                 notificationChecker.put(userfriends.getName(), true);
 
                 NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
                 mNotificationManager.notify(notificationID, mBuilder.build());
+                Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+
+                v.vibrate(500);
+
             }
-            else if(distanceFriend > 0.022 && alreadyNotified){
+            else if(distanceFriend > 0.04 && alreadyNotified){
                 notificationChecker.put(userfriends.getName(), false);
             }
         }

@@ -219,11 +219,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                     if (dataSnapshot.exists()) {
-                                        Log.d("child exists", user.getName());
-                                        Toast.makeText(getApplicationContext(),
-                                                "child already exists",
-                                                Toast.LENGTH_LONG)
-                                                .show();
+
                                     } else {
                                         mDatabase.push().setValue(user);
 
