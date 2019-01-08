@@ -269,6 +269,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
                     snapshot.getRef().child("latitude").setValue(user.getLatitude());
                     snapshot.getRef().child("longitude").setValue(user.getLongitude());
 
+
                 }
             }
 
@@ -484,6 +485,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, EasyPer
         polylines.clear();
         System.out.println("Marker clicked " + marker.getTitle());
         User user = markerUserHashMap.get(marker);
+        assert user != null;
         Polyline line = mMap.addPolyline(
                 new PolylineOptions().add(new LatLng(myLocation.getLatitude(),
                                 myLocation.getLongitude()),
